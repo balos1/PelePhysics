@@ -21,7 +21,7 @@ fi
 
 
 cd builddir/
-#note that these compil flags have been tested on CORI with a gnu compiler 
+#note that these compil flags have been tested on CORI with a gnu compiler
 cmake    \
    -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}    \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON    \
@@ -34,6 +34,8 @@ cmake    \
    -DCMAKE_BUILD_TYPE=Release    \
    -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG"    \
    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG"    \
+   -DCMAKE_CUDA_FLAGS_RELEASE="-O3 -DNDEBUG" \
+   -DCUDA_ARCH="sm_70" \
    -DCUDA_ENABLE=ON   \
    -DMPI_ENABLE=OFF    \
    -DOPENMP_ENABLE=ON \
@@ -42,7 +44,8 @@ cmake    \
    -DKLU_LIBRARY_DIR=${SUITESPARSE_PREFIX}/lib \
    -DEXAMPLES_ENABLE=OFF ../
 
-make
+
+make -j4
 make install
 
 cd ../../
