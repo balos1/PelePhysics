@@ -20,6 +20,7 @@ using namespace amrex;
 // ARKODE or CVODE
   #include <Transport.H>
   #include <reactor.h>
+  #include <sundials/sundials_version.h>
 #else
   #if defined(USE_RK64_PP)
     #include <Transport.H>
@@ -135,6 +136,9 @@ main (int   argc,
     /* PRINT ODE INFO */
     amrex::Print() << "ODE solver: ";
 #ifdef USE_SUNDIALS_PP
+    char sundials_ver[32];
+    SUNDIALSGetVersion(sundials_ver, 32);
+    amrex::Print() << "SUNDIALS version: " << sundials_ver << ", "; 
 #ifdef USE_ARKODE_PP 
     amrex::Print() << "Using ARKODE (impl/expl solver)";
 #else
