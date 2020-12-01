@@ -4,6 +4,8 @@
 #include "mechanism.h"
 #include <AMREX_misc.H>
 
+#include <sunnonlinsol/sunnonlinsol_newton.h>
+
 #define SUN_CUSP_CONTENT(S)        ( (SUNLinearSolverContent_Sparse_custom)(S->content) )
 #define SUN_CUSP_REACTYPE(S)       ( SUN_CUSP_CONTENT(S)->reactor_type )
 #define SUN_CUSP_NUM_SUBSYS(S)     ( SUN_CUSP_CONTENT(S)->nsubsys )
@@ -16,6 +18,7 @@ using namespace amrex;
 /* Global Variables */
   N_Vector         y = NULL; 
   SUNLinearSolver LS = NULL;
+  SUNNonlinearSolver NLS = NULL;
   SUNMatrix A        = NULL;
   void *cvode_mem    = NULL;
   /* User data */
@@ -369,9 +372,12 @@ int reactor_init(int reactor_type, int ode_ncells) {
     flag = CVodeSetMaxOrd(cvode_mem, 2);
     if(check_flag(&flag, "CVodeSetMaxOrd", 1)) return(1);
 
-    /* Set the num of steps to wait inbetween Jac evals */ 
-    flag = CVodeSetMaxStepsBetweenJac(cvode_mem, 100);
-    if(check_flag(&flag, "CVodeSetMaxStepsBetweenJac", 1)) return(1);
+    /* Set the frequency at which to call to Jac eval routine */ 
+    flag = CVodeSetJacEvalFrequency(cvode_mem, 101);
+    if (check_flag(&flag, "CVodeSetJacEvalFrequency", 1)) return(1);
+
+    NLS = SUNNonlinSol_Newton(y);
+    CVodeSetNonlinearSolver(cvode_mem, NLS);
 
     /* Free the atol vector */
     N_VDestroy(atol);
@@ -1012,6 +1018,10 @@ int cJac(realtype /* tn */, N_Vector u, N_Vector /* fu */, SUNMatrix J,
       CVodeGetErrWeights(cvode_mem, tmp1);
       for (int k = 0; k < N_VGetLength(tmp1); k++){
         std::cout << N_VGetArrayPointer(tmp1)[k] << " ";
+      }
+      std::cout << std::endl;
+      for (int k = 0; k < N_VGetLength(tmp1); k++){
+        std::cout << N_VGetArrayPointer(((SUNNonlinearSolverContent_Newton)NLS->content)->delta)[k] << " ";
       }
       std::cout << std::endl;
   }
