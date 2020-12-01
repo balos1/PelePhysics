@@ -8,7 +8,7 @@ ode.ndt = 100
 ode.reactor_type  = 1 # 1=full e, 2=full h
 ode.verbose = 1
 ode.use_typ_vals = 0
-ode.analytical_jacobian = 1 
+ode.analytical_jacobian = 1
 ode.rtol = 1e-10
 ode.atol = 1e-10
 

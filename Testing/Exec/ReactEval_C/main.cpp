@@ -140,6 +140,10 @@ main (int   argc,
     } else if (fuel_name == "NC12H26") {
       fuel_idx  = NC12H26_ID;
 #endif
+#ifdef IC8H18_ID
+    } else if (fuel_name == "IC8H18") {
+      fuel_idx  = IC8H18_ID;
+#endif
     }
 
     EOS::init();
@@ -259,11 +263,14 @@ main (int   argc,
     BL_PROFILE_VAR("Advance",Advance);
     BL_PROFILE_VAR_NS("React",ReactInLoop);
     BL_PROFILE_VAR_NS("Allocs",Allocs);
-    BL_PROFILE_VAR("Flatten",mainflatten);
+    BL_PROFILE_VAR_NS("Flatten",mainflatten);
 #ifdef _OPENMP
-#pragma omp parallel if (Gpu::notInLaunchRegion())
+    const auto tiling = MFItInfo().SetDynamic(true);
+#pragma omp parallel
+#else
+    const bool tiling = TilingIfNotGPU();
 #endif
-    for ( MFIter mfi(mf,TilingIfNotGPU()); mfi.isValid(); ++mfi) {
+    for ( MFIter mfi(mf,tiling); mfi.isValid(); ++mfi) {
 
       const Box& box  = mfi.tilebox();
       int nc          = box.numPts();
@@ -284,7 +291,9 @@ main (int   argc,
       cudaError_t cuda_status = cudaSuccess;
       ode_ncells    = nc;
 #else
+#ifndef CVODE_BOXINTEG
       extra_cells = nc - (nc / ode_ncells) * ode_ncells; 
+#endif
 #endif
 
       Print() << " Integrating " << nc << " cells with a "<<ode_ncells<< " ode cell buffer \n";
@@ -292,7 +301,7 @@ main (int   argc,
 
 #ifndef CVODE_BOXINTEG
       BL_PROFILE_VAR_START(Allocs);
-      int nCells = nc+extra_cells;
+      int nCells               =  nc+extra_cells;
       auto tmp_vect            =  new Real[nCells * (NUM_SPECIES+1)];
       auto tmp_src_vect        =  new Real[nCells * NUM_SPECIES];
       auto tmp_vect_energy     =  new Real[nCells];
@@ -368,7 +377,7 @@ main (int   argc,
                 dt_incr, time,
                 ode_iE, Gpu::gpuStream());
 #else
-          react_1(box,
+          react(box,
                   rhoY, frcExt, T,
                   rhoE, frcEExt,
                   fc, mask,
