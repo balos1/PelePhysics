@@ -46,8 +46,13 @@ endif
 #######################
 ifeq ($(FUEGO_GAS), TRUE)
   Eos_dir         = Fuego
-  Chemistry_Model = drm19
-  Reactions_dir   = Fuego
+	# Chemistry_Model = LiDryer
+  # Chemistry_Model = drm19
+	# Chemistry_Model = dodecane_lu
+  # Chemistry_Model = grimech12
+  Chemistry_Model = grimech30
+  # Chemistry_Model = isooctane_lu
+	Reactions_dir   = Fuego
   Transport_dir   = Simple
 else
   Eos_dir         = GammaLaw
