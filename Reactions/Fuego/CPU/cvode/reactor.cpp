@@ -365,7 +365,7 @@ int reactor_init(int reactor_type, int ode_ncells) {
     }
 
     /* Set the max number of time steps */ 
-    flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
+    flag = CVodeSetMaxNumSteps(cvode_mem, 100000);
     if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) return(1);
 
     /* Set the max order */ 
