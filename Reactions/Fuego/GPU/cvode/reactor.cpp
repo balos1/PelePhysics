@@ -25,6 +25,7 @@ using namespace amrex::sundials;
 
 int sparse_solve          = 1;
 int sparse_cusolver_solve = 5;
+int dense_magma_solve     = 6;
 int iterative_gmres_solve = 99;
 int eint_rho = 1; // in/out = rhoE/rhoY
 int enth_rho = 2; // in/out = rhoH/rhoY
@@ -86,6 +87,8 @@ int reactor_info(int reactor_type, int Ncells){
         isolve_type = sparse_solve; 
     } else if (solve_type_str == "sparse") {
         isolve_type = sparse_cusolver_solve;
+    
+    
     } else if (solve_type_str == "GMRES") {
         isolve_type = iterative_gmres_solve; 
     } else {
@@ -583,6 +586,9 @@ int react(const amrex::Box& box,
         /* Set the user-supplied Jacobian routine Jac */
         flag = CVodeSetJacFn(cvode_mem, cJac);
         if(check_flag(&flag, "CVodeSetJacFn", 1)) return(1); 
+
+    } else if (user_data->isolve_type == dense_magma_solve) {
+
 
     } else {
         /* Create dense SUNLinearSolver object for use by CVode */ 
